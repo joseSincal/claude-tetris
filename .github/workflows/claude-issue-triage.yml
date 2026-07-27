@@ -65,7 +65,10 @@ jobs:
                  spam, o duplicado evidente de otro issue).
                - Nunca quites labels que ya haya puesto una persona (no un bot).
 
-            4. DIAGNÓSTICO: redacta en español un comentario Markdown con esta estructura:
+            4. DIAGNÓSTICO: redacta en español un comentario en Markdown compatible con
+               GitHub (GFM) — encabezados con #, negritas con **, listas, y bloques de
+               código con ``` indicando el lenguaje. Debe renderizarse correctamente en
+               la vista del issue. Usa esta estructura:
 
                <!-- claude-triage -->
                ## Diagnóstico automático
@@ -90,6 +93,10 @@ jobs:
 
                ---
                Para implementar esta solución, comenta `@claude implementa el plan del diagnóstico`.
+
+               Formato: no uses HTML crudo (salvo el marcador oculto `<!-- claude-triage -->`),
+               entrecomilla nombres de archivo/función con backticks, y deja líneas en blanco
+               entre bloques para que GitHub los renderice correctamente.
 
             5. COMENTARIO EDITABLE: el comentario debe empezar con el marcador oculto
                `<!-- claude-triage -->` en la primera línea. Antes de publicar, busca si ya
