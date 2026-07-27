@@ -1,0 +1,109 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+concurrency:
+  group: issue-triage-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    if: |
+      github.event.issue.pull_request == null &&
+      github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Ensure triage labels exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "area:gameplay" --color "1d76db" --description "Reglas del juego, colisiones, puntuación" --force
+          gh label create "area:ui" --color "1d76db" --description "HUD, controles, textos en pantalla" --force
+          gh label create "area:render" --color "1d76db" --description "Canvas, dibujo, colores, layout" --force
+          gh label create "area:input" --color "1d76db" --description "Teclado y manejo de eventos" --force
+          gh label create "priority:high" --color "b60205" --description "Bloquea el juego o rompe una mecánica core" --force
+          gh label create "priority:medium" --color "fbca04" --description "Afecta la experiencia pero hay workaround" --force
+          gh label create "priority:low" --color "0e8a16" --description "Cosmético o de bajo impacto" --force
+
+      - name: Run Claude Code triage
+        id: claude-triage
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--allowedTools "Read,Grep,Glob,Bash(gh issue view:*),Bash(gh issue edit:*),Bash(gh issue comment:*),Bash(gh api:*)"'
+          prompt: |
+            Estás triando el issue #${{ github.event.issue.number }} del repositorio
+            ${{ github.repository }} (juego de Tetris en JS vanilla, ver CLAUDE.md).
+
+            Sigue estos pasos exactamente:
+
+            1. Lee el issue completo:
+               gh issue view ${{ github.event.issue.number }} --json title,body,labels,comments
+
+            2. Lee CLAUDE.md y el código relevante (game.js, index.html, style.css) para
+               entender la arquitectura antes de opinar. No asumas nada que puedas verificar
+               leyendo el código.
+
+            3. ETIQUETAR (gh issue edit ${{ github.event.issue.number }} --add-label "a,b,c"
+               en una sola llamada):
+               - Exactamente un label de tipo: bug, enhancement, documentation o question.
+               - Exactamente un label de área: area:gameplay, area:ui, area:render o area:input
+                 (el que mejor calce; si toca varias, elige la dominante).
+               - Exactamente un label de prioridad: priority:high, priority:medium o priority:low.
+               - Añade duplicate o invalid solo si aplica con claridad (p. ej. issue vacío,
+                 spam, o duplicado evidente de otro issue).
+               - Nunca quites labels que ya haya puesto una persona (no un bot).
+
+            4. DIAGNÓSTICO: redacta en español un comentario Markdown con esta estructura:
+
+               <!-- claude-triage -->
+               ## Diagnóstico automático
+
+               **Resumen**
+               (el problema en 1-2 frases)
+
+               **Reproducción / comportamiento esperado**
+               (o "Falta información" + preguntas concretas al autor si el issue no alcanza)
+
+               **Causa probable**
+               (archivo:función sospechosos, p. ej. game.js: collide(), lockPiece(),
+               tryRotate(), ghostY(); explica por qué)
+
+               **Plan de solución propuesto**
+               (pasos numerados y accionables, con los archivos a tocar; si el cambio toca
+               COLS/ROWS/BLOCK recuerda también actualizar el width/height del <canvas> en
+               index.html, según indica CLAUDE.md)
+
+               **Riesgos / verificación**
+               (qué probar a mano en el navegador; no hay tests automatizados ni build)
+
+               ---
+               Para implementar esta solución, comenta `@claude implementa el plan del diagnóstico`.
+
+            5. COMENTARIO EDITABLE: el comentario debe empezar con el marcador oculto
+               `<!-- claude-triage -->` en la primera línea. Antes de publicar, busca si ya
+               existe un comentario tuyo con ese marcador:
+
+               gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments \
+                 --jq '.[] | select(.body | startswith("<!-- claude-triage -->")) | .id'
+
+               - Si existe un id, actualiza ESE comentario con:
+                 gh api --method PATCH repos/${{ github.repository }}/issues/comments/<id> -f body=@archivo.md
+               - Si no existe, créalo con:
+                 gh issue comment ${{ github.event.issue.number }} --body-file archivo.md
+
+               Así una edición del issue actualiza el mismo comentario en vez de acumular ruido.
+
+            6. No modifiques código, no abras pull requests ni ramas. Tu alcance es solo
+               etiquetar y publicar/actualizar el diagnóstico.
