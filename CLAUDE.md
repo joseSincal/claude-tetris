@@ -17,7 +17,7 @@ All game logic lives in `game.js` (~300 lines), driven by a single `requestAnima
 Key flow: `init()` creates the board and starts the loop → `loop()` accumulates elapsed time and drops the current piece every `dropInterval` ms, calling `lockPiece()` on collision → `lockPiece()` merges the piece into `board`, clears full lines, and calls `spawn()` → `spawn()` promotes `next` to `current`, generates a new `next`, and triggers `endGame()` if the new piece immediately collides.
 
 Notable pieces:
-- `board` is a `ROWS × COLS` matrix; each cell is `0` (empty) or a piece-type index `1–7` used to look up `COLORS`.
+- `board` is a `ROWS × COLS` matrix; each cell is `0` (empty) or a piece-type index `1–8` used to look up `COLORS` (types 1–7 are the classic pieces, 8 is the "tuerca" challenge piece — a 3×3 ring with an empty center).
 - Pieces (`PIECES`) are square matrices; rotation (`rotateCW`) is a transpose + row reversal, not a lookup table.
 - `tryRotate()` implements basic wall kicks by retrying the rotation at x offsets `[0, -1, 1, -2, 2]`.
 - `collide(shape, ox, oy)` is the single collision check used for movement, rotation, and ghost-piece projection.
