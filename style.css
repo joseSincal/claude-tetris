@@ -4,10 +4,6 @@
   padding: 0;
 }
 
-.hidden {
-  display: none !important;
-}
-
 :root {
   --bg: #0f0f17;
   --text: #e0e0e0;
@@ -249,80 +245,4 @@ kbd {
 
 #restart-btn:hover {
   background: var(--accent-hover);
-}
-
-/* ---- Menú de pausa ---- */
-.pause-menu {
-  width: 220px;
-}
-
-.pause-title {
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: 4px;
-  color: var(--accent);
-}
-
-.pause-view {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: stretch;
-  width: 100%;
-}
-
-.pause-view.hidden {
-  display: none;
-}
-
-.pause-view button {
-  background: var(--accent);
-  color: var(--accent-contrast);
-  border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  letter-spacing: 0.5px;
-  transition: background 0.15s;
-}
-
-.pause-view button:hover {
-  background: var(--accent-hover);
-}
-
-#pause-controls-view ul {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 4px;
-}
-
-#pause-controls-view li {
-  font-size: 13px;
-  color: var(--controls-text);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.start-level-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 4px;
-  font-size: 13px;
-  color: var(--text);
-}
-
-.start-level-row select {
-  background: var(--kbd-bg);
-  color: var(--text);
-  border: 1px solid var(--kbd-border);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 13px;
 }
