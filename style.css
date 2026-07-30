@@ -44,6 +44,14 @@
   --overlay-title: #c0392b;
 }
 
+/* La skin Neon necesita un tablero oscuro para que el glow resalte,
+   independientemente del tema claro/oscuro elegido. Va después del bloque
+   de tema claro para ganar la cascada (misma especificidad, orden posterior). */
+:root[data-skin="neon"] {
+  --board-bg: #0a0a12;
+  --grid-line: #1c1c2e;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -127,6 +135,24 @@ body {
   background: var(--board-bg);
   border-radius: 4px;
   transition: background 0.2s, border-color 0.2s;
+}
+
+/* ---- Skin select ---- */
+.skin-select {
+  background: var(--kbd-bg);
+  color: var(--text);
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.skin-select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 /* ---- Controles ---- */
